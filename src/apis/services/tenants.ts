@@ -5,6 +5,8 @@ export type TenantPayload = {
   address: string
   contact_no: string
   unit_id?: number | null
+  unit_rent_amount?: number | null
+  due_date?: number | null
 }
 
 export type TenantItem = {
@@ -13,6 +15,8 @@ export type TenantItem = {
   address: string
   contact_no: string
   unit_id?: number | null
+  unit_rent_amount?: number | null
+  due_date?: number | null
 }
 
 export const TenantsService = {

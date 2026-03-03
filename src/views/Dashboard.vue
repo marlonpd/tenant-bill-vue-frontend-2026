@@ -16,6 +16,8 @@ const form = ref({
   address: '',
   unit_no: '',
   contact_no: '',
+  unit_rent_amount: '',
+  due_date: '',
 })
 
 const isEditing = computed(() => selectedTenantId.value !== null)
@@ -27,6 +29,8 @@ function resetForm() {
     address: '',
     unit_no: '',
     contact_no: '',
+    unit_rent_amount: '',
+    due_date: '',
   }
 }
 
@@ -37,6 +41,11 @@ function startEdit(tenant: any) {
     address: tenant.address || '',
     unit_no: tenant.unit_id ? String(tenant.unit_id) : '',
     contact_no: tenant.contact_no || '',
+    unit_rent_amount:
+      tenant.unit_rent_amount !== null && tenant.unit_rent_amount !== undefined
+        ? String(tenant.unit_rent_amount)
+        : '',
+    due_date: tenant.due_date || '',
   }
 }
 
@@ -45,12 +54,16 @@ async function submitTenant() {
   error.value = ''
   message.value = ''
 
-  const unitNo = form.value.unit_no.trim()
+  const unitNo = String(form.value.unit_no ?? '').trim()
+  const rentAmountRaw = String(form.value.unit_rent_amount ?? '').trim()
+  const dueDateRaw = String(form.value.due_date ?? '').trim()
   const payload = {
     name: form.value.name,
     address: form.value.address,
     contact_no: form.value.contact_no,
     unit_id: unitNo ? Number(unitNo) : null,
+    unit_rent_amount: rentAmountRaw ? Number(rentAmountRaw) : null,
+    due_date: dueDateRaw ? Number(dueDateRaw) : null,
   }
 
   try {
@@ -63,7 +76,11 @@ async function submitTenant() {
     }
     resetForm()
   } catch (err: any) {
-    error.value = err?.response?.data?.error || 'Unable to save tenant.'
+    error.value =
+      err?.response?.data?.error ||
+      err?.response?.data?.msg ||
+      err?.message ||
+      'Unable to save tenant.'
   } finally {
     loading.value = false
   }
@@ -84,6 +101,15 @@ function unitLabel(unitId: number | null | undefined) {
   return found?.unit_no || String(unitId)
 }
 
+function formatCurrency(value: number | null | undefined) {
+  if (value === null || value === undefined) return '-'
+  return new Intl.NumberFormat('en-PH', {
+    style: 'currency',
+    currency: 'PHP',
+    minimumFractionDigits: 2,
+  }).format(value)
+}
+
 async function removeTenant(id: number) {
   loading.value = true
   error.value = ''
@@ -95,7 +121,11 @@ async function removeTenant(id: number) {
       resetForm()
     }
   } catch (err: any) {
-    error.value = err?.response?.data?.error || 'Unable to delete tenant.'
+    error.value =
+      err?.response?.data?.error ||
+      err?.response?.data?.msg ||
+      err?.message ||
+      'Unable to delete tenant.'
   } finally {
     loading.value = false
   }
@@ -124,6 +154,22 @@ onMounted(() => {
         </option>
       </select>
       <input v-model="form.contact_no" type="text" placeholder="Contact no." required />
+      <input
+        v-model="form.unit_rent_amount"
+        type="number"
+        min="0"
+        step="0.01"
+        placeholder="Monthly unit rent amount"
+        required
+      />
+      <input
+        v-model="form.due_date"
+        type="number"
+        min="1"
+        max="31"
+        step="1"
+        placeholder="Due day of month (1-31)"
+      />
 
       <div class="actions">
         <button type="submit" :disabled="loading">
@@ -141,6 +187,8 @@ onMounted(() => {
           <th>Address</th>
           <th>Unit no.</th>
           <th>Contact no.</th>
+          <th>Monthly rent</th>
+          <th>Due date</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -155,6 +203,8 @@ onMounted(() => {
           <td>{{ tenant.address || '-' }}</td>
           <td>{{ unitLabel(tenant.unit_id) }}</td>
           <td>{{ tenant.contact_no || '-' }}</td>
+          <td>{{ formatCurrency(tenant.unit_rent_amount) }}</td>
+          <td>{{ tenant.due_date ? `Day ${tenant.due_date}` : '-' }}</td>
           <td class="actions">
             <button type="button" :disabled="loading" @click="startEdit(tenant)">Edit</button>
             <button type="button" :disabled="loading" @click="removeTenant(tenant.id)">Delete</button>
