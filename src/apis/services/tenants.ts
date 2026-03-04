@@ -7,6 +7,12 @@ export type TenantPayload = {
   unit_id?: number | null
   unit_rent_amount?: number | null
   due_date?: number | null
+  is_fixed_power_rate?: boolean
+  monthly_fixed_power_rate?: number | null
+  initial_electric_sub_meter_reading?: number | null
+  is_fixed_water_rate?: boolean
+  monthly_fixed_water_rate?: number | null
+  initial_water_sub_meter_reading?: number | null
 }
 
 export type TenantItem = {
@@ -17,6 +23,12 @@ export type TenantItem = {
   unit_id?: number | null
   unit_rent_amount?: number | null
   due_date?: number | null
+  is_fixed_power_rate?: boolean
+  monthly_fixed_power_rate?: number | null
+  initial_electric_sub_meter_reading?: number | null
+  is_fixed_water_rate?: boolean
+  monthly_fixed_water_rate?: number | null
+  initial_water_sub_meter_reading?: number | null
 }
 
 export const TenantsService = {
