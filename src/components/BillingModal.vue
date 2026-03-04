@@ -91,10 +91,15 @@ function submit() {
   <Teleport to="body">
     <div v-if="show" class="billing-modal-overlay" @click.self="emit('close')">
       <div class="billing-modal-card">
-        <h3>Create Billing</h3>
+        <div class="modal-header">
+          <h3>Create Billing</h3>
+          <button type="button" class="ghost-btn" :disabled="loading" @click="emit('close')">Close</button>
+        </div>
 
-        <p><strong>Tenant:</strong> {{ tenant?.name || 'Tenant' }}</p>
-        <p><strong>Monthly Rent:</strong> {{ formatCurrency(Number(form.monthly_rent_amount || 0)) }}</p>
+        <div class="meta-row">
+          <p><strong>Tenant:</strong> {{ tenant?.name || 'Tenant' }}</p>
+          <p><strong>Monthly Rent:</strong> {{ formatCurrency(Number(form.monthly_rent_amount || 0)) }}</p>
+        </div>
 
         <form @submit.prevent="submit">
           <input v-model="form.from_date" type="date" required />
@@ -139,7 +144,7 @@ function submit() {
 
           <div class="actions">
             <button type="submit" :disabled="loading">Create Billing</button>
-            <button type="button" :disabled="loading" @click="emit('close')">Cancel</button>
+            <button type="button" class="ghost-btn" :disabled="loading" @click="emit('close')">Cancel</button>
           </div>
         </form>
       </div>
@@ -150,7 +155,9 @@ function submit() {
 <style scoped>
 .actions {
   display: flex;
+  justify-content: flex-end;
   gap: 0.5rem;
+  margin-top: 0.35rem;
 }
 
 .billing-modal-overlay {
@@ -161,15 +168,73 @@ function submit() {
   justify-content: center;
   padding: 1rem;
   z-index: 9999;
-  background-color: rgba(0, 0, 0, 0.45);
+  background-color: var(--vt-c-divider-dark-1);
 }
 
 .billing-modal-card {
   width: 100%;
   max-width: 540px;
   padding: 1rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-background);
+  max-height: 92vh;
+  overflow: auto;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.modal-header h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-accent-hover);
+}
+
+.meta-row {
+  display: grid;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.ghost-btn {
+  background: var(--color-background-soft);
+  color: var(--color-accent);
+  border-color: var(--color-accent-soft);
+}
+
+.ghost-btn:hover:not(:disabled) {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-hover);
+}
+
+@media (max-width: 700px) {
+  .billing-modal-overlay {
+    padding: 0.5rem;
+    align-items: flex-end;
+  }
+
+  .billing-modal-card {
+    max-width: 100%;
+    max-height: 94vh;
+    border-radius: 12px 12px 0 0;
+    padding: 0.85rem;
+  }
+
+  .modal-header {
+    margin-bottom: 0.5rem;
+  }
+
+  .modal-header h3 {
+    font-size: 1rem;
+  }
+
+  .actions button {
+    flex: 1;
+  }
 }
 </style>

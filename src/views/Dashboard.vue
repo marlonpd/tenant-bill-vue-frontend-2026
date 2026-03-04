@@ -4,6 +4,8 @@ import { useTenantsStore } from '@/store/tenants'
 import { UnitsService, type UnitItem } from '@/apis/services/units'
 import { BillingPeriodsService } from '@/apis/services/billingPeriods'
 import BillingModal from '@/components/BillingModal.vue'
+import TenantFormModal from '@/components/TenantFormModal.vue'
+import TenantDetailsModal from '@/components/TenantDetailsModal.vue'
 
 const tenantsStore = useTenantsStore()
 
@@ -14,139 +16,119 @@ const error = ref('')
 const units = ref<UnitItem[]>([])
 const showBillingModal = ref(false)
 const billingTenant = ref<any | null>(null)
-
-const form = ref({
-  name: '',
-  address: '',
-  unit_no: '',
-  contact_no: '',
-  unit_rent_amount: '',
-  due_date: '',
-  is_fixed_power_rate: false,
-  monthly_fixed_power_rate: '',
-  initial_electric_sub_meter_reading: '',
-  is_fixed_water_rate: false,
-  monthly_fixed_water_rate: '',
-  initial_water_sub_meter_reading: '',
-})
+const showTenantModal = ref(false)
+const editingTenant = ref<any | null>(null)
+const showTenantDetailsModal = ref(false)
+const detailTenant = ref<any | null>(null)
+const detailUnitLabel = ref('-')
 
 const isEditing = computed(() => selectedTenantId.value !== null)
 
-function resetForm() {
+function openCreateTenantModal() {
   selectedTenantId.value = null
-  form.value = {
-    name: '',
-    address: '',
-    unit_no: '',
-    contact_no: '',
-    unit_rent_amount: '',
-    due_date: '',
-    is_fixed_power_rate: false,
-    monthly_fixed_power_rate: '',
-    initial_electric_sub_meter_reading: '',
-    is_fixed_water_rate: false,
-    monthly_fixed_water_rate: '',
-    initial_water_sub_meter_reading: '',
-  }
+  editingTenant.value = null
+  showTenantModal.value = true
 }
 
 function startEdit(tenant: any) {
   selectedTenantId.value = tenant.id
-  form.value = {
-    name: tenant.name || '',
-    address: tenant.address || '',
-    unit_no: tenant.unit_id ? String(tenant.unit_id) : '',
-    contact_no: tenant.contact_no || '',
-    unit_rent_amount:
-      tenant.unit_rent_amount !== null && tenant.unit_rent_amount !== undefined
-        ? String(tenant.unit_rent_amount)
-        : '',
-    due_date: tenant.due_date ? String(tenant.due_date) : '',
-    is_fixed_power_rate: !!tenant.is_fixed_power_rate,
-    monthly_fixed_power_rate:
-      tenant.monthly_fixed_power_rate !== null && tenant.monthly_fixed_power_rate !== undefined
-        ? String(tenant.monthly_fixed_power_rate)
-        : '',
-    initial_electric_sub_meter_reading:
-      tenant.initial_electric_sub_meter_reading !== null &&
-      tenant.initial_electric_sub_meter_reading !== undefined
-        ? String(tenant.initial_electric_sub_meter_reading)
-        : '',
-    is_fixed_water_rate: !!tenant.is_fixed_water_rate,
-    monthly_fixed_water_rate:
-      tenant.monthly_fixed_water_rate !== null && tenant.monthly_fixed_water_rate !== undefined
-        ? String(tenant.monthly_fixed_water_rate)
-        : '',
-    initial_water_sub_meter_reading:
-      tenant.initial_water_sub_meter_reading !== null &&
-      tenant.initial_water_sub_meter_reading !== undefined
-        ? String(tenant.initial_water_sub_meter_reading)
-        : '',
-  }
+  editingTenant.value = tenant
+  showTenantModal.value = true
 }
 
-async function submitTenant() {
+function closeTenantModal() {
+  showTenantModal.value = false
+  editingTenant.value = null
+  selectedTenantId.value = null
+}
+
+function openTenantDetailsModal(tenant: any) {
+  detailTenant.value = tenant
+  detailUnitLabel.value = unitLabel(tenant.unit_id)
+  showTenantDetailsModal.value = true
+}
+
+function closeTenantDetailsModal() {
+  showTenantDetailsModal.value = false
+  detailTenant.value = null
+  detailUnitLabel.value = '-'
+}
+
+async function submitTenant(payload: {
+  name: string
+  address: string
+  unit_no: string
+  contact_no: string
+  unit_rent_amount: string
+  due_date: string
+  is_fixed_power_rate: boolean
+  monthly_fixed_power_rate: string
+  initial_electric_sub_meter_reading: string
+  is_fixed_water_rate: boolean
+  monthly_fixed_water_rate: string
+  initial_water_sub_meter_reading: string
+}) {
   loading.value = true
   error.value = ''
   message.value = ''
 
-  const unitNo = String(form.value.unit_no ?? '').trim()
-  const rentAmountRaw = String(form.value.unit_rent_amount ?? '').trim()
-  const dueDateRaw = String(form.value.due_date ?? '').trim()
-  const monthlyFixedPowerRateRaw = String(form.value.monthly_fixed_power_rate ?? '').trim()
-  const electricInitialRaw = String(form.value.initial_electric_sub_meter_reading ?? '').trim()
-  const monthlyFixedWaterRateRaw = String(form.value.monthly_fixed_water_rate ?? '').trim()
-  const waterInitialRaw = String(form.value.initial_water_sub_meter_reading ?? '').trim()
+  const unitNo = String(payload.unit_no ?? '').trim()
+  const rentAmountRaw = String(payload.unit_rent_amount ?? '').trim()
+  const dueDateRaw = String(payload.due_date ?? '').trim()
+  const monthlyFixedPowerRateRaw = String(payload.monthly_fixed_power_rate ?? '').trim()
+  const electricInitialRaw = String(payload.initial_electric_sub_meter_reading ?? '').trim()
+  const monthlyFixedWaterRateRaw = String(payload.monthly_fixed_water_rate ?? '').trim()
+  const waterInitialRaw = String(payload.initial_water_sub_meter_reading ?? '').trim()
 
-  if (form.value.is_fixed_power_rate && !monthlyFixedPowerRateRaw) {
+  if (payload.is_fixed_power_rate && !monthlyFixedPowerRateRaw) {
     loading.value = false
     error.value = 'Monthly fixed electric rate is required when electric bill is fixed.'
     return
   }
 
-  if (form.value.is_fixed_water_rate && !monthlyFixedWaterRateRaw) {
+  if (payload.is_fixed_water_rate && !monthlyFixedWaterRateRaw) {
     loading.value = false
     error.value = 'Monthly fixed water rate is required when water bill is fixed.'
     return
   }
 
-  if (!form.value.is_fixed_power_rate && !electricInitialRaw) {
+  if (!payload.is_fixed_power_rate && !electricInitialRaw) {
     loading.value = false
     error.value = 'Initial electric sub meter reading is required for meter-based electric billing.'
     return
   }
 
-  if (!form.value.is_fixed_water_rate && !waterInitialRaw) {
+  if (!payload.is_fixed_water_rate && !waterInitialRaw) {
     loading.value = false
     error.value = 'Initial water sub meter reading is required for meter-based water billing.'
     return
   }
 
-  const payload = {
-    name: form.value.name,
-    address: form.value.address,
-    contact_no: form.value.contact_no,
+  const tenantPayload = {
+    name: payload.name,
+    address: payload.address,
+    contact_no: payload.contact_no,
     unit_id: unitNo ? Number(unitNo) : null,
     unit_rent_amount: rentAmountRaw ? Number(rentAmountRaw) : null,
     due_date: dueDateRaw ? Number(dueDateRaw) : null,
-    is_fixed_power_rate: form.value.is_fixed_power_rate,
-    monthly_fixed_power_rate: form.value.is_fixed_power_rate
+    is_fixed_power_rate: payload.is_fixed_power_rate,
+    monthly_fixed_power_rate: payload.is_fixed_power_rate
       ? monthlyFixedPowerRateRaw
         ? Number(monthlyFixedPowerRateRaw)
         : null
       : null,
-    initial_electric_sub_meter_reading: form.value.is_fixed_power_rate
+    initial_electric_sub_meter_reading: payload.is_fixed_power_rate
       ? null
       : electricInitialRaw
         ? Number(electricInitialRaw)
         : null,
-    is_fixed_water_rate: form.value.is_fixed_water_rate,
-    monthly_fixed_water_rate: form.value.is_fixed_water_rate
+    is_fixed_water_rate: payload.is_fixed_water_rate,
+    monthly_fixed_water_rate: payload.is_fixed_water_rate
       ? monthlyFixedWaterRateRaw
         ? Number(monthlyFixedWaterRateRaw)
         : null
       : null,
-    initial_water_sub_meter_reading: form.value.is_fixed_water_rate
+    initial_water_sub_meter_reading: payload.is_fixed_water_rate
       ? null
       : waterInitialRaw
         ? Number(waterInitialRaw)
@@ -155,13 +137,14 @@ async function submitTenant() {
 
   try {
     if (isEditing.value && selectedTenantId.value) {
-      await tenantsStore.updateTenant(selectedTenantId.value, payload)
+      await tenantsStore.updateTenant(selectedTenantId.value, tenantPayload)
       message.value = 'Tenant updated successfully.'
     } else {
-      await tenantsStore.createTenant(payload)
+      await tenantsStore.createTenant(tenantPayload)
       message.value = 'Tenant created successfully.'
     }
-    resetForm()
+    selectedTenantId.value = null
+    closeTenantModal()
   } catch (err: any) {
     error.value =
       err?.response?.data?.error ||
@@ -275,7 +258,8 @@ async function removeTenant(id: number) {
     await tenantsStore.deleteTenant(id)
     message.value = 'Tenant deleted successfully.'
     if (selectedTenantId.value === id) {
-      resetForm()
+      selectedTenantId.value = null
+      closeTenantModal()
     }
   } catch (err: any) {
     error.value =
@@ -296,138 +280,55 @@ onMounted(() => {
 
 <template>
   <section class="page-wrap">
-    <h2>Tenants</h2>
+    <div class="page-header">
+      <h2 class="page-title">Tenants</h2>
+      <div class="header-actions">
+        <button type="button" class="primary-btn" :disabled="loading" @click="openCreateTenantModal">
+          New Tenant
+        </button>
+      </div>
+    </div>
 
-    <p v-if="message">{{ message }}</p>
+    <p v-if="message" class="status-message">{{ message }}</p>
     <p v-if="error" class="error">{{ error }}</p>
 
-    <form @submit.prevent="submitTenant">
-      <input v-model="form.name" type="text" placeholder="Name" required />
-      <input v-model="form.address" type="text" placeholder="Address" required />
-      <select v-model="form.unit_no">
-        <option value="">Select unit</option>
-        <option v-for="unit in units" :key="unit.id" :value="String(unit.id)">
-          {{ unit.unit_no }}
-        </option>
-      </select>
-      <input v-model="form.contact_no" type="text" placeholder="Contact no." required />
-      <input
-        v-model="form.unit_rent_amount"
-        type="number"
-        min="0"
-        step="0.01"
-        placeholder="Monthly unit rent amount"
-        required
-      />
-      <input
-        v-model="form.due_date"
-        type="number"
-        min="1"
-        max="31"
-        step="1"
-        placeholder="Due day of month (1-31)"
-      />
-
-      <label>
-        <input v-model="form.is_fixed_power_rate" type="checkbox" />
-        Electric bill is fixed rate
-      </label>
-      <input
-        v-if="form.is_fixed_power_rate"
-        v-model="form.monthly_fixed_power_rate"
-        type="number"
-        min="0"
-        step="0.01"
-        placeholder="Monthly fixed electric rate"
-        required
-      />
-      <input
-        v-if="!form.is_fixed_power_rate"
-        v-model="form.initial_electric_sub_meter_reading"
-        type="number"
-        min="0"
-        step="0.01"
-        placeholder="Initial electric sub meter reading"
-        required
-      />
-
-      <label>
-        <input v-model="form.is_fixed_water_rate" type="checkbox" />
-        Water bill is fixed rate
-      </label>
-      <input
-        v-if="form.is_fixed_water_rate"
-        v-model="form.monthly_fixed_water_rate"
-        type="number"
-        min="0"
-        step="0.01"
-        placeholder="Monthly fixed water rate"
-        required
-      />
-      <input
-        v-if="!form.is_fixed_water_rate"
-        v-model="form.initial_water_sub_meter_reading"
-        type="number"
-        min="0"
-        step="0.01"
-        placeholder="Initial water sub meter reading"
-        required
-      />
-
-      <div class="actions">
-        <button type="submit" :disabled="loading">
-          {{ isEditing ? 'Update Tenant' : 'Create Tenant' }}
-        </button>
-        <button type="button" :disabled="loading" @click="resetForm">Clear</button>
-      </div>
-    </form>
-
-    <table>
+    <div class="table-wrap">
+      <table>
       <thead>
         <tr>
           <th>#</th>
           <th>Name</th>
-          <th>Address</th>
           <th>Unit no.</th>
           <th>Contact no.</th>
           <th>Monthly rent</th>
           <th>Due date</th>
-          <th>Electric billing</th>
-          <th>Monthly fixed electric rate</th>
-          <th>Initial electric reading</th>
-          <th>Water billing</th>
-          <th>Monthly fixed water rate</th>
-          <th>Initial water reading</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(tenant, index) in tenantsStore.tenants" :key="tenant.id || index">
-          <td>{{ index + 1 }}</td>
-          <td>
+          <td data-label="#">{{ index + 1 }}</td>
+          <td data-label="Name">
             <RouterLink :to="{ name: 'meter.reading', params: { tenantId: tenant.id } }">
               {{ tenant.name || 'Tenant' }}
             </RouterLink>
           </td>
-          <td>{{ tenant.address || '-' }}</td>
-          <td>{{ unitLabel(tenant.unit_id) }}</td>
-          <td>{{ tenant.contact_no || '-' }}</td>
-          <td>{{ formatCurrency(tenant.unit_rent_amount) }}</td>
-          <td>{{ tenant.due_date ? `Day ${tenant.due_date}` : '-' }}</td>
-          <td>{{ tenant.is_fixed_power_rate ? 'Fixed' : 'Meter-based' }}</td>
-          <td>{{ formatCurrency(tenant.monthly_fixed_power_rate) }}</td>
-          <td>{{ tenant.initial_electric_sub_meter_reading ?? '-' }}</td>
-          <td>{{ tenant.is_fixed_water_rate ? 'Fixed' : 'Meter-based' }}</td>
-          <td>{{ formatCurrency(tenant.monthly_fixed_water_rate) }}</td>
-          <td>{{ tenant.initial_water_sub_meter_reading ?? '-' }}</td>
-          <td class="actions">
-            <button type="button" :disabled="loading" @click="openBillingModal(tenant)">New Billing</button>
-            <button type="button" :disabled="loading" @click="startEdit(tenant)">Edit</button>
-            <button type="button" :disabled="loading" @click="removeTenant(tenant.id)">Delete</button>
+          <td data-label="Unit no.">{{ unitLabel(tenant.unit_id) }}</td>
+          <td data-label="Contact no.">{{ tenant.contact_no || '-' }}</td>
+          <td data-label="Monthly rent">{{ formatCurrency(tenant.unit_rent_amount) }}</td>
+          <td data-label="Due date">{{ tenant.due_date ? `Day ${tenant.due_date}` : '-' }}</td>
+          <td data-label="Actions">
+            <div class="row-actions">
+              <button type="button" :disabled="loading" @click="openTenantDetailsModal(tenant)">View More</button>
+              <button type="button" :disabled="loading" @click="openBillingModal(tenant)">New Billing</button>
+              <button type="button" :disabled="loading" @click="startEdit(tenant)">Edit</button>
+              <button type="button" :disabled="loading" @click="removeTenant(tenant.id)">Delete</button>
+            </div>
           </td>
         </tr>
       </tbody>
     </table>
+    </div>
 
     <BillingModal
       :show="showBillingModal"
@@ -436,12 +337,140 @@ onMounted(() => {
       @close="closeBillingModal"
       @submit="submitBilling"
     />
+
+    <TenantFormModal
+      :show="showTenantModal"
+      :loading="loading"
+      :is-editing="isEditing"
+      :tenant="editingTenant"
+      :units="units"
+      @close="closeTenantModal"
+      @submit="submitTenant"
+    />
+
+    <TenantDetailsModal
+      :show="showTenantDetailsModal"
+      :tenant="detailTenant"
+      :unit-label="detailUnitLabel"
+      @close="closeTenantDetailsModal"
+    />
   </section>
 </template>
 
 <style scoped>
-.actions {
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-heading);
+}
+
+.header-actions {
   display: flex;
   gap: 0.5rem;
+}
+
+.primary-btn {
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.25);
+}
+
+.status-message {
+  margin-bottom: 0.35rem;
+}
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--color-accent);
+  border-radius: 999px;
+  background: var(--color-accent-soft);
+  color: var(--color-accent-hover);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+@media (max-width: 900px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-actions,
+  .primary-btn {
+    width: 100%;
+  }
+
+  .table-wrap {
+    border: none;
+    overflow: visible;
+  }
+
+  table,
+  tbody,
+  tr,
+  td {
+    display: block;
+    width: 100%;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tbody tr {
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 0.65rem;
+    margin-bottom: 0.65rem;
+    background: var(--color-background);
+  }
+
+  td {
+    border: none;
+    border-bottom: 1px dashed var(--color-border);
+    padding: 0.5rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  td:last-child {
+    border-bottom: none;
+  }
+
+  td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--color-heading);
+    flex: 0 0 48%;
+    text-align: left;
+  }
+
+  .row-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
 }
 </style>

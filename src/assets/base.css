@@ -19,6 +19,14 @@
   --vt-c-text-light-2: rgba(60, 60, 60, 0.66);
   --vt-c-text-dark-1: var(--vt-c-white);
   --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
+
+  --brand-sky-50: #f0f9ff;
+  --brand-sky-100: #e0f2fe;
+  --brand-sky-200: #bae6fd;
+  --brand-sky-400: #38bdf8;
+  --brand-sky-500: #0ea5e9;
+  --brand-sky-600: #0284c7;
+  --brand-sky-700: #0369a1;
 }
 
 /* semantic color variables for this project */
@@ -32,6 +40,9 @@
 
   --color-heading: var(--vt-c-text-light-1);
   --color-text: var(--vt-c-text-light-1);
+  --color-accent: var(--brand-sky-600);
+  --color-accent-hover: var(--brand-sky-700);
+  --color-accent-soft: var(--brand-sky-100);
 
   --section-gap: 160px;
 }
@@ -47,6 +58,9 @@
 
     --color-heading: var(--vt-c-text-dark-1);
     --color-text: var(--vt-c-text-dark-2);
+    --color-accent: var(--brand-sky-400);
+    --color-accent-hover: var(--brand-sky-200);
+    --color-accent-soft: rgba(56, 189, 248, 0.2);
   }
 }
 
