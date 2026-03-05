@@ -22,15 +22,25 @@ async function onSubmit() {
 </script>
 
 <template>
-  <section class="page-wrap">
-    <h2>Login</h2>
-    <p v-if="error" class="error">{{ error }}</p>
-    <form @submit.prevent="onSubmit">
-      <input v-model="email" type="email" placeholder="Email" required />
-      <input v-model="password" type="password" placeholder="Password" required />
-      <button type="submit">Log in</button>
-    </form>
-    <RouterLink :to="{ name: 'home' }">Back to home</RouterLink>
-    <RouterLink :to="{ name: 'register' }">Need an account?</RouterLink>
+  <section class="auth-page">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <img src="/renthq-logo.svg" alt="RentHQ logo" />
+        <h2 class="auth-title">Welcome Back</h2>
+        <p class="auth-subtitle">Sign in to manage billing, tenants, and utilities.</p>
+      </div>
+
+      <p v-if="error" class="error">{{ error }}</p>
+      <form @submit.prevent="onSubmit">
+        <input v-model="email" type="email" placeholder="Email" required />
+        <input v-model="password" type="password" placeholder="Password" required />
+        <button type="submit">Log in</button>
+      </form>
+
+      <div class="auth-links">
+        <RouterLink :to="{ name: 'home' }">Back to home</RouterLink>
+        <RouterLink :to="{ name: 'register' }">Create account</RouterLink>
+      </div>
+    </div>
   </section>
 </template>

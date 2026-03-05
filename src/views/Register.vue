@@ -37,17 +37,29 @@ async function onSubmit() {
 </script>
 
 <template>
-  <section class="page-wrap">
-    <h2>Register</h2>
-    <p v-if="message">{{ message }}</p>
-    <p v-if="error" class="error">{{ error }}</p>
-    <form @submit.prevent="onSubmit">
-      <input v-model="name" type="text" placeholder="Name" required />
-      <input v-model="email" type="email" placeholder="Email" required />
-      <input v-model="password" type="password" placeholder="Password" required />
-      <input v-model="confirmPassword" type="password" placeholder="Confirm Password" required />
-      <button type="submit">Register</button>
-    </form>
-    <RouterLink :to="{ name: 'login' }">Already have an account?</RouterLink>
+  <section class="auth-page">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <img src="/renthq-logo.svg" alt="RentHQ logo" />
+        <h2 class="auth-title">Create Your Account</h2>
+        <p class="auth-subtitle">Start using RentHQ for property billing operations.</p>
+      </div>
+
+      <p v-if="message">{{ message }}</p>
+      <p v-if="error" class="error">{{ error }}</p>
+
+      <form @submit.prevent="onSubmit">
+        <input v-model="name" type="text" placeholder="Full name" required />
+        <input v-model="email" type="email" placeholder="Email" required />
+        <input v-model="password" type="password" placeholder="Password" required />
+        <input v-model="confirmPassword" type="password" placeholder="Confirm password" required />
+        <button type="submit">Register</button>
+      </form>
+
+      <div class="auth-links">
+        <RouterLink :to="{ name: 'home' }">Back to home</RouterLink>
+        <RouterLink :to="{ name: 'login' }">Already have an account?</RouterLink>
+      </div>
+    </div>
   </section>
 </template>
