@@ -1,0 +1,48 @@
+ESSENTIAL FEATURES ROADMAP
+Date: 2026-03-04
+Project: Biller App
+
+PHASE 1 (Core Cashflow, 1-2 weeks)
+1) Payments UI + Tenant Ledger UI
+   - Payment modal/form (amount, date, method, reference)
+   - Tenant ledger panel with running balance
+2) Billing Status UX
+   - Show Draft/Issued/Partially Paid/Paid/Overdue badges
+3) Receipt UI
+   - Printable receipt view per payment
+
+Frontend Priority Tasks
+- Add Payment service/store
+- Add ledger and payments components/modals
+- Add status badges in tenant and billing history views
+- Add receipt print component/button
+
+Suggested Frontend Deliverables
+- Payment entry modal component
+- Ledger modal/component
+- Status badges in Dashboard and BillingHistoryModal
+- Receipt print template
+
+PHASE 2 (Billing Automation, ~1 week)
+1) Bulk Billing UX
+   - One-click monthly generation action with confirmation
+2) Overdue UX
+   - Highlight overdue bills and show late-fee line item
+3) Notifications UX
+   - In-app reminder list/toasts
+
+PHASE 3 (Control + Reporting, 1-2 weeks)
+1) Search/Filter UI
+   - Tenant, status, date range filters
+2) Exports UI
+   - CSV/PDF export buttons in history/ledger views
+3) Audit and Roles UX
+   - Activity log view
+   - Role-aware button visibility and guards
+
+RECOMMENDED IMPLEMENTATION ORDER (NEXT)
+1) Payment modal + service/store
+2) Ledger summary in Dashboard
+3) Status badges and transitions
+4) Receipt print screen
+5) Bulk/Overdue tools

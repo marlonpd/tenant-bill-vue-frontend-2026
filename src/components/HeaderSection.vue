@@ -13,6 +13,9 @@ async function onLogout() {
 
 <template>
   <nav class="header-nav">
+    <RouterLink class="brand-link" :to="{ name: 'home' }">
+      <img src="/renthq-logo.svg" alt="RentHQ logo" class="brand-logo" />
+    </RouterLink>
     <div class="header-links">
       <RouterLink :to="{ name: 'profile' }">Profile</RouterLink>
       <RouterLink :to="{ name: 'dashboard' }">Tenants</RouterLink>
@@ -37,6 +40,16 @@ async function onLogout() {
   background: var(--color-background-soft);
 }
 
+.brand-link {
+  display: inline-flex;
+  align-items: center;
+}
+
+.brand-logo {
+  width: 120px;
+  height: auto;
+}
+
 .header-links {
   display: flex;
   flex-wrap: wrap;
@@ -58,6 +71,10 @@ async function onLogout() {
   .header-nav {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .brand-link {
+    justify-content: center;
   }
 }
 </style>

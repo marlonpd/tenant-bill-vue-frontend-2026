@@ -52,7 +52,7 @@ async function handleLogin() {
 
 <template>
   <main class="api-page">
-    <h1>Biller API Test</h1>
+    <h1>RentHQ API Test</h1>
 
     <section>
       <h2>Register</h2>

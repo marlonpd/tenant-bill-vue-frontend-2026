@@ -24,13 +24,26 @@ export const AccountService = {
   me() {
     return ApiService.get('/account/me')
   },
+  getRandomPublicProfile() {
+    return ApiService.get('/account/public-random')
+  },
+  getRandomPublicProfiles(limit = 10) {
+    return ApiService.query('/account/public-random-list', { limit })
+  },
+  getPublicProfile(userId: number) {
+    return ApiService.get(`/account/public/${userId}`)
+  },
   updateProfile(payload: {
+    contact_no?: string | null
     address?: string | null
     latitude?: number | null
     longitude?: number | null
     profilePhoto?: File | null
   }) {
     const formData = new FormData()
+    if (payload.contact_no !== undefined) {
+      formData.append('contact_no', payload.contact_no || '')
+    }
     if (payload.address !== undefined) {
       formData.append('address', payload.address || '')
     }

@@ -72,3 +72,7 @@ npm run test:e2e -- --debug
 npm run lint
 ```
 # tenant-bill-vue-frontend-2026
+
+## Deployment (Netlify)
+
+See [DEPLOY_NETLIFY.md](DEPLOY_NETLIFY.md) for step-by-step deployment and environment variable setup (`VITE_API_BASE_URL`).

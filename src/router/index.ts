@@ -12,6 +12,7 @@ import MeterReading from '@/views/MeterReading.vue'
 import TenantLogin from '@/views/TenantLogin.vue'
 import TenantPortal from '@/views/TenantPortal.vue'
 import LandingPage from '@/views/LandingPage.vue'
+import PublicProfile from '@/views/PublicProfile.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -41,6 +42,11 @@ const router = createRouter({
       path: '/tenant/portal',
       component: TenantPortal,
       meta: { requiresTenantAuth: true },
+    },
+    {
+      name: 'public-profile',
+      path: '/public-profile/:userId',
+      component: PublicProfile,
     },
     {
       name: 'dashboard',

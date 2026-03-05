@@ -8,6 +8,7 @@ export const useAuthStore = defineStore('auth', () => {
     name?: string
     email?: string
     role?: string
+    contact_no?: string | null
     address?: string | null
     profile_photo_url?: string | null
     latitude?: number | null

@@ -1,6 +1,6 @@
 <template>
   <footer class="footer-section">
-    <small>Tenant Biller</small>
+    <small>RentHQ</small>
   </footer>
 </template>
 

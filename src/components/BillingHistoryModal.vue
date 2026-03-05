@@ -112,7 +112,7 @@ function printBill(bill: BillingPeriodItem) {
       <body>
         <div class="header">
           <div>
-            <p class="title">Tenant Biller</p>
+            <p class="title">RentHQ</p>
             <p class="subtitle">Official Billing Statement</p>
           </div>
           <div>
@@ -244,7 +244,7 @@ function printReceipt(bill: BillingPeriodItem, payment: BillingPeriodItem['payme
       <body>
         <div class="header">
           <div>
-            <p class="title">Tenant Biller</p>
+            <p class="title">RentHQ</p>
             <p>Official Payment Receipt</p>
           </div>
           <div>
@@ -355,7 +355,7 @@ function exportCsv() {
           <article v-for="bill in filteredBillingPeriods" :key="bill.id" class="bill-paper">
             <header class="bill-header">
               <div>
-                <h4>Tenant Biller</h4>
+                <h4>RentHQ</h4>
                 <p>Official Billing Statement</p>
                 <p><strong>Tenant:</strong> {{ bill.tenant_name || tenant?.name || '-' }}</p>
               </div>

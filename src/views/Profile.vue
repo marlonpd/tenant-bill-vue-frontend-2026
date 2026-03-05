@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
 import { API_URL } from '@/apis/config'
 import { AccountService } from '@/apis/services/account'
 import { useAuthStore } from '@/store/auth'
@@ -11,8 +13,12 @@ const message = ref('')
 const error = ref('')
 const selectedPhoto = ref<File | null>(null)
 const localPhotoPreview = ref<string | null>(null)
+const mapContainer = ref<HTMLDivElement | null>(null)
+let mapInstance: L.Map | null = null
+let mapPin: L.CircleMarker | null = null
 
 const form = ref({
+  contact_no: '',
   address: '',
   latitude: '',
   longitude: '',
@@ -38,13 +44,6 @@ const currentPhotoUrl = computed(() => {
   return resolvePhotoUrl(authStore.user.profile_photo_url || '')
 })
 
-const mapEmbedUrl = computed(() => {
-  const lat = form.value.latitude.trim()
-  const lng = form.value.longitude.trim()
-  if (!lat || !lng) return ''
-  return `https://maps.google.com/maps?q=${encodeURIComponent(`${lat},${lng}`)}&z=15&output=embed`
-})
-
 const googleMapsLink = computed(() => {
   const lat = form.value.latitude.trim()
   const lng = form.value.longitude.trim()
@@ -52,7 +51,54 @@ const googleMapsLink = computed(() => {
   return `https://maps.google.com/?q=${encodeURIComponent(`${lat},${lng}`)}`
 })
 
+function parseCoordinates() {
+  const lat = Number(form.value.latitude)
+  const lng = Number(form.value.longitude)
+  if (Number.isNaN(lat) || Number.isNaN(lng)) return null
+  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null
+  return { lat, lng }
+}
+
+function syncMapPinFromForm(shouldRecenter = false) {
+  if (!mapInstance || !mapPin) return
+  const coords = parseCoordinates()
+  if (!coords) return
+  mapPin.setLatLng([coords.lat, coords.lng])
+  if (shouldRecenter) {
+    mapInstance.setView([coords.lat, coords.lng], mapInstance.getZoom())
+  }
+}
+
+function initMap() {
+  if (!mapContainer.value || mapInstance) return
+
+  const initialCoords = parseCoordinates() || { lat: 14.5995, lng: 120.9842 }
+
+  mapInstance = L.map(mapContainer.value).setView([initialCoords.lat, initialCoords.lng], 13)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors',
+  }).addTo(mapInstance)
+
+  mapPin = L.circleMarker([initialCoords.lat, initialCoords.lng], {
+    radius: 8,
+    color: '#0284c7',
+    fillColor: '#38bdf8',
+    fillOpacity: 0.9,
+    weight: 2,
+  }).addTo(mapInstance)
+
+  mapInstance.on('click', (event: L.LeafletMouseEvent) => {
+    const latitude = Number(event.latlng.lat.toFixed(6))
+    const longitude = Number(event.latlng.lng.toFixed(6))
+    form.value.latitude = String(latitude)
+    form.value.longitude = String(longitude)
+    syncMapPinFromForm()
+  })
+}
+
 function populateFormFromUser() {
+  form.value.contact_no = authStore.user.contact_no || ''
   form.value.address = authStore.user.address || ''
   form.value.latitude =
     authStore.user.latitude !== null && authStore.user.latitude !== undefined
@@ -119,6 +165,7 @@ async function saveProfile() {
 
   try {
     const { data } = await AccountService.updateProfile({
+      contact_no: form.value.contact_no || null,
       address: form.value.address || null,
       latitude,
       longitude,
@@ -148,7 +195,28 @@ async function saveProfile() {
 onMounted(async () => {
   await authStore.fetchMe()
   populateFormFromUser()
+  initMap()
+  syncMapPinFromForm(true)
 })
+
+onUnmounted(() => {
+  if (localPhotoPreview.value) {
+    URL.revokeObjectURL(localPhotoPreview.value)
+    localPhotoPreview.value = null
+  }
+  if (mapInstance) {
+    mapInstance.remove()
+    mapInstance = null
+    mapPin = null
+  }
+})
+
+watch(
+  () => [form.value.latitude, form.value.longitude],
+  () => {
+    syncMapPinFromForm()
+  },
+)
 </script>
 
 <template>
@@ -168,11 +236,13 @@ onMounted(async () => {
       <div class="profile-basic">
         <p><strong>Name:</strong> {{ authStore.user.name || '-' }}</p>
         <p><strong>Email:</strong> {{ authStore.user.email || '-' }}</p>
+        <p><strong>Contact no.:</strong> {{ authStore.user.contact_no || '-' }}</p>
         <p><strong>Role:</strong> {{ authStore.user.role || '-' }}</p>
       </div>
     </div>
 
     <form @submit.prevent="saveProfile">
+      <input v-model="form.contact_no" type="text" placeholder="Contact no." />
       <input v-model="form.address" type="text" placeholder="Address" />
 
       <div class="location-row">
@@ -185,13 +255,8 @@ onMounted(async () => {
         <a :href="googleMapsLink" target="_blank" rel="noopener noreferrer">Open in Google Maps</a>
       </div>
 
-      <iframe
-        v-if="mapEmbedUrl"
-        :src="mapEmbedUrl"
-        class="map-preview"
-        loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade"
-      ></iframe>
+      <p class="map-hint">Click on the map to pin your location.</p>
+      <div ref="mapContainer" class="map-picker"></div>
 
       <button type="submit" :disabled="loading">{{ loading ? 'Saving...' : 'Save Profile' }}</button>
     </form>
@@ -249,11 +314,17 @@ onMounted(async () => {
   gap: 0.75rem;
 }
 
-.map-preview {
+.map-hint {
+  font-size: 0.85rem;
+  color: var(--color-text);
+}
+
+.map-picker {
   width: 100%;
-  height: 260px;
+  height: 320px;
   border: 1px solid var(--color-border);
   border-radius: 10px;
+  overflow: hidden;
 }
 
 @media (max-width: 800px) {
