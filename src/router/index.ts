@@ -13,6 +13,7 @@ import TenantLogin from '@/views/TenantLogin.vue'
 import TenantPortal from '@/views/TenantPortal.vue'
 import LandingPage from '@/views/LandingPage.vue'
 import PublicProfile from '@/views/PublicProfile.vue'
+import ErrorLogs from '@/views/ErrorLogs.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -64,6 +65,12 @@ const router = createRouter({
       name: 'profile',
       path: '/profile',
       component: Profile,
+      meta: { requiresAuth: true },
+    },
+    {
+      name: 'error-logs',
+      path: '/error-logs',
+      component: ErrorLogs,
       meta: { requiresAuth: true },
     },
     {

@@ -1,9 +1,15 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/auth'
 
 const router = useRouter()
 const authStore = useAuthStore()
+
+const isManager = computed(() => {
+  const role = (authStore.user.role || '').toLowerCase()
+  return role === 'owner' || role === 'admin'
+})
 
 async function onLogout() {
   await authStore.logout()
@@ -22,6 +28,7 @@ async function onLogout() {
       <RouterLink :to="{ name: 'units' }">Units</RouterLink>
       <RouterLink :to="{ name: 'power-rates' }">Power Rates</RouterLink>
       <RouterLink :to="{ name: 'water-rates' }">Water Rates</RouterLink>
+      <RouterLink v-if="isManager" :to="{ name: 'error-logs' }">Error Logs</RouterLink>
     </div>
     <button type="button" @click="onLogout">Sign out</button>
   </nav>
