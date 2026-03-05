@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { usePowerRateStore } from '@/store/powerRate'
+import { useWaterRateStore } from '@/store/waterRate'
 
-const powerRateStore = usePowerRateStore()
+const waterRateStore = useWaterRateStore()
 const rate = ref<string>('')
 const rateDate = ref<string>(new Date().toISOString().slice(0, 10))
 const editingId = ref<number | null>(null)
 const isSubmitting = ref(false)
 const errorMessage = ref('')
 
-const hasRates = computed(() => powerRateStore.powerRates.length > 0)
-const currentRate = computed(() => powerRateStore.powerRates[0] || null)
+const hasRates = computed(() => waterRateStore.waterRates.length > 0)
+const currentRate = computed(() => waterRateStore.waterRates[0] || null)
 
 function formatRate(value: number | string | null | undefined) {
   const numeric = Number(value)
@@ -50,7 +50,7 @@ async function submitForm() {
 
   const parsedRate = Number(rate.value)
   if (!Number.isFinite(parsedRate) || parsedRate < 0) {
-    errorMessage.value = 'Please enter a valid non-negative rate per kWh.'
+    errorMessage.value = 'Please enter a valid non-negative rate per cubic meter.'
     return
   }
 
@@ -67,37 +67,37 @@ async function submitForm() {
     }
 
     if (editingId.value) {
-      await powerRateStore.updatePowerRate(editingId.value, payload)
+      await waterRateStore.updateWaterRate(editingId.value, payload)
     } else {
-      await powerRateStore.createPowerRate(payload)
+      await waterRateStore.createWaterRate(payload)
     }
     resetForm()
   } catch (error: any) {
     errorMessage.value =
-      error?.response?.data?.error || 'Unable to save power rate. Please try again.'
+      error?.response?.data?.error || 'Unable to save water rate. Please try again.'
   } finally {
     isSubmitting.value = false
   }
 }
 
-async function removePowerRate(powerRateId: number) {
+async function removeWaterRate(waterRateId: number) {
   errorMessage.value = ''
   isSubmitting.value = true
   try {
-    await powerRateStore.deletePowerRate(powerRateId)
-    if (editingId.value === powerRateId) {
+    await waterRateStore.deleteWaterRate(waterRateId)
+    if (editingId.value === waterRateId) {
       resetForm()
     }
   } catch (error: any) {
     errorMessage.value =
-      error?.response?.data?.error || 'Unable to delete power rate. Please try again.'
+      error?.response?.data?.error || 'Unable to delete water rate. Please try again.'
   } finally {
     isSubmitting.value = false
   }
 }
 
 onMounted(() => {
-  powerRateStore.fetchPowerRates()
+  waterRateStore.fetchWaterRates()
 })
 </script>
 
@@ -105,16 +105,16 @@ onMounted(() => {
   <section class="page-wrap">
     <header class="section-header">
       <div>
-        <h2>Power Rates per kWh</h2>
-        <p class="section-subtitle">Manage your current electricity rate history.</p>
+        <h2>Water Rates per m³</h2>
+        <p class="section-subtitle">Manage your current water rate history.</p>
       </div>
       <div class="current-rate" v-if="currentRate">
         <span class="current-label">Current</span>
-        <strong>{{ formatRate(currentRate.rate) }} / kWh</strong>
+        <strong>{{ formatRate(currentRate.rate) }} / m³</strong>
       </div>
     </header>
 
-    <form @submit.prevent="submitForm" class="power-rate-form">
+    <form @submit.prevent="submitForm" class="rate-form">
       <div class="form-grid">
         <label>
           <span>Rate</span>
@@ -123,7 +123,7 @@ onMounted(() => {
             type="number"
             step="0.0001"
             min="0"
-            placeholder="Rate per kWh"
+            placeholder="Rate per cubic meter"
             :disabled="isSubmitting"
           />
         </label>
@@ -149,18 +149,18 @@ onMounted(() => {
       <table>
         <thead>
           <tr>
-            <th>Rate / kWh</th>
+            <th>Rate / m³</th>
             <th>Effective Date</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="item in powerRateStore.powerRates" :key="item.id">
+          <tr v-for="item in waterRateStore.waterRates" :key="item.id">
             <td>{{ formatRate(item.rate) }}</td>
             <td>{{ formatDate(item.rate_date) }}</td>
             <td class="action-cell">
               <button type="button" @click="startEdit(item)" :disabled="isSubmitting">Edit</button>
-              <button type="button" @click="removePowerRate(item.id)" :disabled="isSubmitting">
+              <button type="button" @click="removeWaterRate(item.id)" :disabled="isSubmitting">
                 Delete
               </button>
             </td>
@@ -168,7 +168,7 @@ onMounted(() => {
         </tbody>
       </table>
     </div>
-    <p v-else class="empty-state">No power rates yet.</p>
+    <p v-else class="empty-state">No water rates yet.</p>
   </section>
 </template>
 
@@ -202,7 +202,7 @@ onMounted(() => {
   color: var(--color-heading);
 }
 
-.power-rate-form {
+.rate-form {
   margin-bottom: 1rem;
 }
 

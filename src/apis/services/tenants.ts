@@ -3,7 +3,10 @@ import ApiService from '@/apis/api'
 export type TenantPayload = {
   name: string
   address: string
+  start_date?: string | null
   contact_no: string
+  email?: string | null
+  password?: string | null
   unit_id?: number | null
   unit_rent_amount?: number | null
   due_date?: number | null
@@ -19,7 +22,10 @@ export type TenantItem = {
   id: number
   name: string
   address: string
+  start_date?: string | null
   contact_no: string
+  email?: string | null
+  status?: string | null
   unit_id?: number | null
   unit_rent_amount?: number | null
   due_date?: number | null

@@ -30,6 +30,7 @@ async function onSubmit() {
       <input v-model="password" type="password" placeholder="Password" required />
       <button type="submit">Log in</button>
     </form>
+    <RouterLink :to="{ name: 'home' }">Back to home</RouterLink>
     <RouterLink :to="{ name: 'register' }">Need an account?</RouterLink>
   </section>
 </template>

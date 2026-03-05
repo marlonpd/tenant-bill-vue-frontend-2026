@@ -4,7 +4,15 @@ import { AccountService } from '@/apis/services/account'
 import JwtService from '@/apis/jwt'
 
 export const useAuthStore = defineStore('auth', () => {
-  const user = ref<{ name?: string; email?: string }>({})
+  const user = ref<{
+    name?: string
+    email?: string
+    role?: string
+    address?: string | null
+    profile_photo_url?: string | null
+    latitude?: number | null
+    longitude?: number | null
+  }>({})
   const errors = ref<string[]>([])
   const token = ref<string | null>(JwtService.getToken())
 
@@ -16,6 +24,12 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = data.access_token
     user.value = data.user || {}
     JwtService.saveToken(data.access_token)
+  }
+
+  async function fetchMe() {
+    if (!token.value) return
+    const { data } = await AccountService.me()
+    user.value = data.user || {}
   }
 
   async function register(payload: { name: string; email: string; password: string }) {
@@ -33,5 +47,5 @@ export const useAuthStore = defineStore('auth', () => {
     JwtService.destroyToken()
   }
 
-  return { user, errors, token, isAuthenticated, login, register, logout }
+  return { user, errors, token, isAuthenticated, login, register, logout, fetchMe }
 })

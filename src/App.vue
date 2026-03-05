@@ -1,17 +1,19 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { RouterView } from 'vue-router'
+import { RouterView, useRoute } from 'vue-router'
 import HeaderSection from '@/components/HeaderSection.vue'
 import FooterSection from '@/components/FooterSection.vue'
 import { useAuthStore } from '@/store/auth'
 
 const authStore = useAuthStore()
+const route = useRoute()
 const isAuthenticated = computed(() => authStore.isAuthenticated)
+const isTenantPortalRoute = computed(() => String(route.path || '').startsWith('/tenant/'))
 </script>
 
 <template>
   <div class="app-shell">
-    <HeaderSection v-if="isAuthenticated" />
+    <HeaderSection v-if="isAuthenticated && !isTenantPortalRoute" />
     <RouterView />
     <FooterSection />
   </div>

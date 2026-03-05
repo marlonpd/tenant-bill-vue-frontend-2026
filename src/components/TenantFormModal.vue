@@ -6,8 +6,10 @@ type TenantLike = {
   id?: number
   name?: string
   address?: string
+  start_date?: string | null
   unit_id?: number | null
   contact_no?: string
+  email?: string | null
   unit_rent_amount?: number | null
   due_date?: number | null
   is_fixed_power_rate?: boolean
@@ -21,8 +23,11 @@ type TenantLike = {
 type TenantFormPayload = {
   name: string
   address: string
+  start_date: string
   unit_no: string
   contact_no: string
+  email: string
+  password: string
   unit_rent_amount: string
   due_date: string
   is_fixed_power_rate: boolean
@@ -49,8 +54,11 @@ const emit = defineEmits<{
 const form = ref<TenantFormPayload>({
   name: '',
   address: '',
+  start_date: '',
   unit_no: '',
   contact_no: '',
+  email: '',
+  password: '',
   unit_rent_amount: '',
   due_date: '',
   is_fixed_power_rate: false,
@@ -65,8 +73,11 @@ function setCreateDefaults() {
   form.value = {
     name: '',
     address: '',
+    start_date: '',
     unit_no: '',
     contact_no: '',
+    email: '',
+    password: '',
     unit_rent_amount: '',
     due_date: '',
     is_fixed_power_rate: false,
@@ -82,8 +93,11 @@ function setEditDefaults(tenant: TenantLike) {
   form.value = {
     name: tenant.name || '',
     address: tenant.address || '',
+    start_date: tenant.start_date ? String(tenant.start_date).slice(0, 10) : '',
     unit_no: tenant.unit_id ? String(tenant.unit_id) : '',
     contact_no: tenant.contact_no || '',
+    email: tenant.email || '',
+    password: '',
     unit_rent_amount:
       tenant.unit_rent_amount !== null && tenant.unit_rent_amount !== undefined
         ? String(tenant.unit_rent_amount)
@@ -142,6 +156,7 @@ function submit() {
         <form @submit.prevent="submit">
           <input v-model="form.name" type="text" placeholder="Name" required />
           <input v-model="form.address" type="text" placeholder="Address" required />
+          <input v-model="form.start_date" type="date" placeholder="Start date" />
 
           <select v-model="form.unit_no">
             <option value="">Select unit</option>
@@ -151,6 +166,13 @@ function submit() {
           </select>
 
           <input v-model="form.contact_no" type="text" placeholder="Contact no." required />
+          <input v-model="form.email" type="email" placeholder="Tenant email" required />
+          <input
+            v-model="form.password"
+            type="password"
+            :placeholder="isEditing ? 'Tenant password (leave blank to keep current)' : 'Tenant password'"
+            :required="!isEditing"
+          />
           <input
             v-model="form.unit_rent_amount"
             type="number"

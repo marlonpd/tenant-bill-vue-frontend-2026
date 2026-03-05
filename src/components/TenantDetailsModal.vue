@@ -3,6 +3,7 @@ type TenantLike = {
   id?: number
   name?: string
   address?: string
+  start_date?: string | null
   unit_id?: number | null
   contact_no?: string
   unit_rent_amount?: number | null
@@ -33,6 +34,13 @@ function formatCurrency(value: number | null | undefined) {
     minimumFractionDigits: 2,
   }).format(value)
 }
+
+function formatDate(value: string | null | undefined) {
+  if (!value) return '-'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return date.toLocaleDateString()
+}
 </script>
 
 <template>
@@ -49,6 +57,7 @@ function formatCurrency(value: number | null | undefined) {
           <div class="detail-item"><span class="label">Address</span><span>{{ tenant?.address || '-' }}</span></div>
           <div class="detail-item"><span class="label">Unit no.</span><span>{{ unitLabel }}</span></div>
           <div class="detail-item"><span class="label">Contact no.</span><span>{{ tenant?.contact_no || '-' }}</span></div>
+          <div class="detail-item"><span class="label">Start date</span><span>{{ formatDate(tenant?.start_date) }}</span></div>
           <div class="detail-item"><span class="label">Monthly rent</span><span>{{ formatCurrency(tenant?.unit_rent_amount) }}</span></div>
           <div class="detail-item"><span class="label">Due date</span><span>{{ tenant?.due_date ? `Day ${tenant?.due_date}` : '-' }}</span></div>
 

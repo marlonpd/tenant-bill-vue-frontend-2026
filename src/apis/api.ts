@@ -52,8 +52,8 @@ const ApiService = {
   put(resource: string, params?: object) {
     return apiClient.put(resource, params)
   },
-  delete(resource: string) {
-    return apiClient.delete(resource)
+  delete(resource: string, params?: object) {
+    return apiClient.delete(resource, params ? { data: params } : undefined)
   },
 }
 

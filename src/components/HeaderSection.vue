@@ -18,6 +18,7 @@ async function onLogout() {
       <RouterLink :to="{ name: 'dashboard' }">Tenants</RouterLink>
       <RouterLink :to="{ name: 'units' }">Units</RouterLink>
       <RouterLink :to="{ name: 'power-rates' }">Power Rates</RouterLink>
+      <RouterLink :to="{ name: 'water-rates' }">Water Rates</RouterLink>
     </div>
     <button type="button" @click="onLogout">Sign out</button>
   </nav>
