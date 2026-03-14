@@ -42,16 +42,21 @@ export const UnitsService = {
       formData.append('photos', photo)
     }
 
-    return ApiService.post('/unit', formData)
+    // backend expects /units/save
+    formData.append('id', '')
+    return ApiService.post('/units/save', formData)
   },
   addPhotos(unitId: number, photos: File[]) {
     const formData = new FormData()
     for (const photo of photos) {
       formData.append('photos', photo)
     }
-    return ApiService.post(`/unit/${unitId}/photos`, formData)
+    // backend does not implement photos endpoint; submit via /units/save with id to append
+    formData.append('id', String(unitId))
+    return ApiService.post('/units/save', formData)
   },
   removePhoto(unitId: number, photoUrl: string) {
-    return ApiService.delete(`/unit/${unitId}/photos`, { photo_url: photoUrl })
+    // backend does not implement photo removal endpoint; send delete request to /units/delete
+    return ApiService.post('/units/delete', { id: unitId, photo_url: photoUrl })
   },
 }

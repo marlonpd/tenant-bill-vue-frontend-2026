@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "../.."
+		},
+		{
+			"path": "../../../nodejs-backend"
 		}
 	],
 	"settings": {}

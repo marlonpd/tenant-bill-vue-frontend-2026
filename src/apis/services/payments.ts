@@ -11,7 +11,7 @@ export type PaymentPayload = {
 
 export const PaymentsService = {
   create(payload: PaymentPayload) {
-    return ApiService.post('/payment', payload)
+    return ApiService.post('/payments/save', payload)
   },
   getAll(params?: { tenant_id?: number; billing_period_id?: number }) {
     return ApiService.query('/payments', params)

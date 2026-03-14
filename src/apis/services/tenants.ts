@@ -42,12 +42,12 @@ export const TenantsService = {
     return ApiService.get('/tenants')
   },
   create(payload: TenantPayload) {
-    return ApiService.post('/tenant', payload)
+    return ApiService.post('/tenants/save', payload)
   },
   update(id: number, payload: TenantPayload) {
-    return ApiService.put(`/tenant/${id}`, payload)
+    return ApiService.post('/tenants/save', { ...payload, id })
   },
   destroy(id: number) {
-    return ApiService.delete(`/tenant/${id}`)
+    return ApiService.post('/tenants/delete', { id })
   },
 }
